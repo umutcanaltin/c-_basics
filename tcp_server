@@ -1,0 +1,130 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace TcpServer
+{
+    public partial class Form1 : Form
+    {   
+        TcpListener listener ;
+        int port ;
+       
+        
+        public Form1()
+        {
+            CheckForIllegalCrossThreadCalls = false;
+            InitializeComponent();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                string ip = entry_ıp.Text;
+                this.port = Convert.ToInt32(entry_port.Text);
+                
+                this.listener = new TcpListener(IPAddress.Any, this.port);
+                Thread ctThread = new Thread(() => start_server(this.listener));
+                ctThread.Start();
+                text_sistem.AppendText("\n");
+                text_sistem.AppendText("Server Başlatıldı.");
+                buton_baslat.Enabled = false;
+                
+
+
+            }
+            catch(Exception ex)
+            {
+
+                text_hata.AppendText("\n");
+                text_hata.AppendText("Port Numarasını Tamsayı Değeri Giriniz!");
+                text_hata.AppendText("\n");
+                text_hata.AppendText(Convert.ToString(ex));
+                buton_baslat.Enabled = true;
+            }
+        }
+        public void start_server(TcpListener listener)
+        {
+            listener.Start();
+
+            try
+            {
+                if (listener.Pending())
+                {
+                    TcpClient client = listener.AcceptTcpClient();
+                    Thread cThread = new Thread(() => start_listen(client));
+                    cThread.Start();
+                }
+            }
+            catch(Exception ex1)
+            {
+                text_hata.AppendText("\n");
+                text_hata.AppendText(Convert.ToString(ex1));
+
+            }
+
+
+        }
+        public void start_listen(TcpClient client)
+        {
+            
+            NetworkStream clientStream = client.GetStream();
+            byte[] message = new byte[4096];
+            int bytesRead;
+            while (true)
+            {
+                bytesRead = 0;
+                try
+                {
+                    //blocks until a client sends a message
+                    bytesRead = clientStream.Read(message, 0, 4096);
+                }
+                catch(Exception ex)
+                { 
+
+                    text_hata.AppendText("\n");
+                    text_hata.AppendText(Convert.ToString(ex));
+                    break;
+                }
+                if (bytesRead == 0)
+                {
+                    text_sistem.AppendText("\n");
+                    text_sistem.AppendText("Kanal Kapandı");
+                    break;
+                }
+                //message has successfully been received
+                ASCIIEncoding encoder = new ASCIIEncoding();
+                string bufferincmessage = encoder.GetString(message, 0, bytesRead);
+               
+            }
+        }
+
+        private void buton_kapat_Click(object sender, EventArgs e)
+        {
+            this.listener.Stop();
+            buton_baslat.Enabled = true;
+
+        }
+    }
+
+
+
+
+    
+    
+}
