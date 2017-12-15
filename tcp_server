@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
 using System.Windows.Forms;
 
 namespace TcpServer
@@ -25,7 +21,11 @@ namespace TcpServer
             InitializeComponent();
         }
 
-       
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
 
@@ -33,8 +33,8 @@ namespace TcpServer
             {
                 string ip = entry_ıp.Text;
                 this.port = Convert.ToInt32(entry_port.Text);
-                
-                this.listener = new TcpListener(IPAddress.Any, this.port);
+                IPAddress ıp1 = IPAddress.Parse(ip);
+                this.listener = new TcpListener(ıp1, this.port);
                 Thread ctThread = new Thread(() => start_server(this.listener));
                 ctThread.Start();
                 text_sistem.AppendText("\n");
@@ -57,15 +57,18 @@ namespace TcpServer
         public void start_server(TcpListener listener)
         {
             listener.Start();
+            text_sistem.AppendText("\n");
+            text_sistem.AppendText("okudu03");
 
             try
             {
-                if (listener.Pending())
-                {
+               
                     TcpClient client = listener.AcceptTcpClient();
+                    text_sistem.AppendText("\n");
+                    text_sistem.AppendText("okudu02");
                     Thread cThread = new Thread(() => start_listen(client));
                     cThread.Start();
-                }
+                
             }
             catch(Exception ex1)
             {
@@ -78,35 +81,79 @@ namespace TcpServer
         }
         public void start_listen(TcpClient client)
         {
-            
+            string rasp=" ", mesag=" ", client_ip=" ",saniye =" ";
+            int kapandı = 0;
+            text_sistem.AppendText("\n");
+            text_sistem.AppendText("okudu01");
+            Stopwatch watch = new Stopwatch();
             NetworkStream clientStream = client.GetStream();
             byte[] message = new byte[4096];
-            int bytesRead;
+            int bytesRead=1;
             while (true)
             {
-                bytesRead = 0;
+                watch.Start();
+                text_sistem.AppendText("\n");
+                text_sistem.AppendText("okudu0");
+
                 try
                 {
+                    bytesRead = clientStream.Read(message, 0, message.Length);
+                    text_sistem.AppendText("\n");
+                    text_sistem.AppendText("okudu");
                     //blocks until a client sends a message
-                    bytesRead = clientStream.Read(message, 0, 4096);
+
+                    ASCIIEncoding encoder = new ASCIIEncoding();
+                    string data = encoder.GetString(message, 0, bytesRead);
+                    
+                    char split = '=';
+                    string[] veri1 = data.Split(split);
+                    rasp = veri1[3];
+                    mesag = veri1[0];
+                    text_sistem.AppendText("\n");
+                    text_sistem.AppendText(mesag);
+                    text_thread.AppendText("\n");
+                    text_thread.AppendText(rasp);
+                    byte[] msg = encoder.GetBytes(data);
+                    clientStream.Write(msg, 0, msg.Length);
+
+                    IPEndPoint clientIPAddress = (IPEndPoint)client.Client.RemoteEndPoint;
+                    client_ip =clientIPAddress.Address.ToString();
+                    watch.Stop();
+                    
+                    saniye = Convert.ToString(watch.Elapsed.Milliseconds);
+                   
+
                 }
                 catch(Exception ex)
                 { 
 
                     text_hata.AppendText("\n");
                     text_hata.AppendText(Convert.ToString(ex));
-                    break;
+                    
                 }
                 if (bytesRead == 0)
                 {
                     text_sistem.AppendText("\n");
                     text_sistem.AppendText("Kanal Kapandı");
-                    break;
+                    kapandı = 1;
+                   
                 }
-                //message has successfully been received
-                ASCIIEncoding encoder = new ASCIIEncoding();
-                string bufferincmessage = encoder.GetString(message, 0, bytesRead);
-               
+                try
+                {
+                    string[] row = new string[] { rasp, client_ip, "3", "4", "5", saniye };
+                    dataGridView1.Rows.Add(row);
+                }
+                catch(Exception ex)
+                {
+                    text_hata.AppendText("\n");
+                    text_hata.AppendText(Convert.ToString(ex));
+                    
+
+                }
+                
+                
+
+
             }
         }
 
@@ -114,7 +161,14 @@ namespace TcpServer
         {
             this.listener.Stop();
             buton_baslat.Enabled = true;
+            text_sistem.AppendText("\n");
+            text_sistem.AppendText("Server Kapandı.");
 
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            
         }
     }
 
@@ -124,3 +178,4 @@ namespace TcpServer
     
     
 }
+
