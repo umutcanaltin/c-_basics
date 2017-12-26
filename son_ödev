@@ -1,0 +1,170 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp1
+{
+    class Program
+    {
+        /*Umut Can Altın 22069983728  Proj_3 */
+        static void Main(string[] args)
+        {
+            while (true) {
+                Console.WriteLine("Please Enter The File Name   :");
+                Dosya dosya = new Dosya(Console.ReadLine());
+                if (dosya.Dosya_kontrol() == 0)
+                {
+                    Console.WriteLine("File can not find.");
+                    break;
+                }
+                menu(dosya);
+            }
+        }
+        static void menu(Dosya dosya)
+        {
+            
+            int tekrar = 1;
+            while (tekrar==1) {
+                Console.WriteLine("Please choise the number of the function that you want. For a new file choise 4");
+                int fonk_num = Convert.ToInt16(Console.ReadLine());
+                tekrar = 1;
+                switch (fonk_num)
+                {
+                    case 1:
+                        Console.WriteLine("Enter a word");
+                        Console.WriteLine(dosya.word_count(Console.ReadLine()));
+                        break;
+                    case 2:
+                        Console.WriteLine("Enter First Word");
+                        string word1 = Console.ReadLine();
+                        Console.WriteLine("Enter second word");
+                        string word2 = Console.ReadLine();
+                        dosya.word_replace(word1, word2);
+                        break;
+                    case 3:
+                        dosya.word_polindrome();
+                        break;
+                    case 4:
+                        tekrar = 0;
+                        break;
+
+                    default:
+                        Console.WriteLine("This is not a valid function try again");
+                        break;
+                }
+            }
+        }
+    }
+
+    class Dosya
+    {
+        
+        string file;
+
+        public Dosya(string file_name)  /* Sınıf için gerekli verilerin tanımlamdığı fonk.*/
+        {     
+                this.file = file_name;
+        }
+
+        public int Dosya_kontrol()/*Dosya yolu doğru mu kontrolü*/
+        {
+            if (File.Exists(this.file))
+            {    
+                return 1;  
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        public int word_count(string user_input)
+        {
+           
+            int wordcount = 0;
+            using (StreamReader sr = new StreamReader(this.file,Encoding.GetEncoding("iso-8859-9")))
+            {
+                string read = string.Empty;
+                while((read=sr.ReadLine())!=null)
+                {
+                    
+                   
+                    read.Replace("?", " ");
+                    read.Replace("!", " ");
+                    read.Replace(".", " ");
+                    read.Replace(",", " ");
+
+                    string[] array = read.ToLower().Split(' ');
+
+                    for (int i=0;i<array.Length;i++)
+                    {
+                        if (array[i]==user_input.ToLower())
+                        {
+                            wordcount++;
+                        }
+
+                    }
+                }
+            }
+            return wordcount;
+        }
+
+        public void word_replace(string word1,string word2)
+        {
+            
+            File.WriteAllText(this.file, File.ReadAllText(this.file).Replace(word1, word2), Encoding.GetEncoding("iso-8859-9"));
+
+        }
+        public void word_polindrome()
+        {
+            using (StreamReader sr = new StreamReader(this.file, Encoding.GetEncoding("iso-8859-9")))
+            {
+                string read = string.Empty;
+                while ((read = sr.ReadLine()) != null)
+                {
+
+
+                    read.Replace("?", " ");
+                    read.Replace("!", " ");
+                    read.Replace(".", " ");
+                    read.Replace(",", " ");
+
+                    string[] array = read.ToLower().Split(' ');
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        string part1;
+                        string part2;
+                        if (array[i].Length % 2 == 1)
+                        {
+                            part1 = array[i].Substring(0, array[i].Length / 2);
+                            char[] arr = part1.ToCharArray();               /* Stringin ilk kısmını ters çevirme*/
+                            Array.Reverse(arr);
+                            part1 = new string(arr);
+                            part2 = array[i].Substring((array[i].Length / 2)+1, array[i].Length / 2);
+                        }
+                        else
+                        {
+                            part1 = array[i].Substring(0, array[i].Length / 2);
+                            char[] arr = part1.ToCharArray();
+                            Array.Reverse(arr);
+                            part1 = new string(arr);
+                            part2 = array[i].Substring((array[i].Length / 2) , array[i].Length / 2);
+
+                        }
+                        if (part1==part2)
+                        {
+                            Console.WriteLine(array[i]);
+                        }
+                        
+                       
+
+                    }
+                }
+            }
+        }
+
+    }
+}
