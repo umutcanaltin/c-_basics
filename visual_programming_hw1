@@ -1,0 +1,153 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Homework_2
+{
+    /* Umut Can Altın HW1 */
+    public partial class Form1 : Form
+    {   /* string two dimensional array for describing menus in days */
+        string[,] days = new string[10,7] {
+        {"26.02.2018", "soupA", "meatB", "suffleA", "cola", "water" ,"10"},
+        { "27.02.2018", "soupB", "meatA", "suffleA", "cola", "water" ,"12"},
+        { "28.02.2018", "soupC", "meatC", "suffleB", "cola", "water","20" },
+        { "01.03.2018", "soupD", "meatD", "suffleC", "cola", "water","22"  },
+        { "02.03.2018", "soupA", "meatA", "suffleD", "cola", "water" ,"18" },
+        { "05.03.2018", "soupB", "meatC", "suffleA", "cola", "water","13"  },
+        { "06.03.2018", "soupC", "meatB", "suffleA", "cola", "water" ,"15" },
+        { "07.03.2018", "soupD", "meatD", "suffleC", "cola", "water" ,"15" },
+        { "08.03.2018", "soupA", "meatA", "suffleC", "cola", "water" ,"14" },
+        { "09.03.2018", "soupB", "meatA", "suffleD", "cola", "water" ,"18" }};
+       
+
+        public Form1()
+        {
+            InitializeComponent();
+            
+        }
+        
+       
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            
+            
+            label2.Text = dateTimePicker1.Value.ToString("dd.MM.yyyy");
+            textBox1.Text = String.Empty;
+
+            /* This loop for search to menus in time that user picks */
+            for (int i=0;i<10;i++) {
+               
+                    if (days[i, 0] == label2.Text) {
+                        
+                        for (int k = 1; k < 6; k++) {
+                        /* Add menu ıtems to textbox with newline */
+                        textBox1.AppendText(days[i, k] + Environment.NewLine);
+                        }
+                       
+                    }
+                
+            }
+            if ((string.IsNullOrEmpty(textBox1.Text))) {
+                /* İf there is no menu in that date this statement would work*/
+                MessageBox.Show("Please Select A Day In 26.02.2018-09.03.2018", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(textBox1.Text) ) {
+                bool isin=false;
+
+                foreach (var listBoxItem in listBox1.Items) {
+                    /* check the choosen date already added to listbox or not with isin bolean statement*/
+                    if (label2.Text==listBoxItem.ToString()) {
+                        isin = true;
+                    }
+                }
+                if (isin == false)
+                {
+                    listBox1.Items.Add(label2.Text);
+                }
+                else
+                {
+                    MessageBox.Show("Already Added To List!");
+                }
+            }
+        }
+        /* listBox1_MouseDoubleClick function is for show  the menu to user who double clicks a listbox ıtem */
+        private void listBox1_MouseDoubleClick(object sender, EventArgs e)
+        {
+            if (listBox1.SelectedItem != null)
+            {
+                string menu1 = "";
+
+                for (int i = 0; i < 10; i++)
+                {
+                   
+                        if (days[i, 0] == listBox1.SelectedItem.ToString())
+                        {
+                            
+                            for (int k = 1; k < 6; k++)
+                            {
+                                menu1 = menu1 + days[i, k] + "\t";
+                                
+                            }
+
+                        }
+                    
+                }
+                MessageBox.Show( menu1,"Menu Of the Day");
+            }
+        }
+        /* if user choose date in listbox and press remove button this function delete it */
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (listBox1.SelectedItem != null)
+            {
+                listBox1.Items.Remove(listBox1.SelectedItem);
+            }
+            else
+            {
+                MessageBox.Show("Please Select A Day", "Error",MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+        /* if listbox is not empty when user press the cost button it shows the total cost of menus to user */
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (listBox1.Items.Count == 0)
+            {
+                MessageBox.Show("Your Menu List Is Empty", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                int cost = 0;
+                foreach (var list_menu in listBox1.Items)
+                {
+                   
+                    for (int i = 0; i < 10; i++)
+                    {
+                       
+                            if (days[i, 0] == list_menu.ToString())
+                            {
+
+                                cost = cost + Convert.ToInt32(days[i,6]);
+
+                            }
+                        
+                    }
+                }
+                MessageBox.Show("Cost of menus is    $"+Convert.ToString(cost), DateTime.Now.ToString());
+            }
+
+        }
+    }
+}
